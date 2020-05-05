@@ -1,4 +1,4 @@
-# Dataset
+
 import numpy as np
 import h5py
 import torch
@@ -44,8 +44,8 @@ class GNSDataset(InMemoryDataset):
             # Drop the first 5 and the last step since we don't have accurate velocities/accelerations
             for t in range(6,num_steps-1):
                 x = np.concatenate((positions[t], m, np.concatenate(velocities[t-5:t], axis=1)), axis=1)
-                y = torch.tensor(accelerations[t])
-                data = Data(x=torch.tensor(x), y=y, pos=torch.as_tensor(positions[t]))
+                y = torch.tensor(accelerations[t]).float()
+                data = Data(x=torch.tensor(x).float(), y=y, pos=torch.as_tensor(positions[t]))
                 # Apply pre-transform to get edges
                 calculate_edges = self.pre_transform or RadiusGraph(R)
                 data = calculate_edges(data)
