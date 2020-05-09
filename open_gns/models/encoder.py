@@ -4,6 +4,7 @@ from torch.nn import Sequential, Linear, ReLU, LayerNorm
 from torch_geometric.nn import MetaLayer
 
 def make_mlp(input_size, hidden_size=128, output_size=128, layer_norm=True):
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     layers = [
         Linear(input_size, hidden_size),
             ReLU(),
@@ -13,12 +14,13 @@ def make_mlp(input_size, hidden_size=128, output_size=128, layer_norm=True):
     ]
     if layer_norm:
         layers.append(LayerNorm(output_size))
-    return Sequential(*layers)
+    return Sequential(*layers).to(device)
 
 class EdgeModel(torch.nn.Module):
     def __init__(self, input_size, hidden_size=128):
         super(EdgeModel, self).__init__()
         self.edge_mlp = make_mlp(input_size, hidden_size)
+
     def forward(self, src, dest, edge_attr, u, batch):
         features = [src, dest] if edge_attr is None else [src, dest, edge_attr]
         out = torch.cat(features, 1)

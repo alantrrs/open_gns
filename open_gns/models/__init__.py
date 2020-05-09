@@ -9,7 +9,7 @@ class EncodeProcessDecode(torch.nn.Module):
         self.encoder = Encoder(input_size)
         self.processor = Processor(hidden_size)
         self.decoder = Decoder(hidden_size)
-    
+
     def forward(self, x, edge_index):
         x, edge_attr, _ = self.encoder(x, edge_index)
         x, edge_attr, _ = self.processor(x, edge_index, edge_attr)
