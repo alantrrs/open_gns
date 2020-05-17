@@ -1,4 +1,3 @@
-.vim/**
 *.pyc
 *.pt
 *.hdf5
