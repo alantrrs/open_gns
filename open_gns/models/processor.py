@@ -6,7 +6,7 @@ from open_gns.models.encoder import EdgeModel, NodeModel
 class Processor(torch.nn.Module):
     def __init__(self, input_size, output_size=128, M=10):
         super(Processor, self).__init__()
-        self.GNs = []
+        self.GNs = torch.nn.ModuleList([])
         for i in range(M):
             GN = MetaLayer(EdgeModel(3*input_size), NodeModel(input_size))
             self.GNs.append(GN) 
