@@ -22,7 +22,7 @@ class GNSDataset(InMemoryDataset):
         
     @property
     def raw_file_names(self):
-        return ['box_bath.hdf5']
+        return [f'{self.root}/box_bath.hdf5']
     
     @property
     def processed_file_names(self):
@@ -42,10 +42,18 @@ class GNSDataset(InMemoryDataset):
         m[0:64] = [0,1] # First 64 particles are solid
         m[64:] = [1,0]
         # TODO: Global forces
-        # TODO: Distance to walls
         # Drop the first 5 and the last step since we don't have accurate velocities/accelerations
         for t in range(6,num_steps-1):
-            x = np.concatenate((positions[t], m, np.concatenate(velocities[t-5:t], axis=1)), axis=1)
+            # Distance to the 5 walls
+            d = np.stack([
+                positions[t][:,1],       # bottom
+                positions[t][:,0],       # left
+                positions[t][:,2],        # back
+                1.2 - positions[t][:,0], # right
+                0.4 - positions[t][:,2]   # front
+            ], axis=1)
+            d = np.clip(d, 0, R)
+            x = np.concatenate((positions[t], m, np.concatenate(velocities[t-5:t], axis=1), d), axis=1)
             y = torch.tensor(accelerations[t]).float()
             data = Data(x=torch.tensor(x).float(), y=y, pos=torch.as_tensor(positions[t]))
             # print(f'Step {t}:', data)

@@ -35,9 +35,6 @@ class Simulator():
         if pos is not None:
             data.x[:,:3] = pos
         accelerations_ = self.model(data.x, data.edge_index)
-        # Assert latest velocity is still in the data
-        assert torch.all(data.x[:,-3:] == self.velocities[:,-3:])
-        assert torch.all(data.pos == data.x[:,:3])
         velocities_ = data.x[:,-3:] + accelerations_ 
         positions_ = data.pos + velocities_
         # Reconstruct data for next frame
