@@ -9,8 +9,8 @@ class Simulator():
         # initialize the model
         self.R = R
         self.device = device or torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        checkpoint = torch.load('checkpoint_5_2.9207797146117526e-06.pt')
-        input_size = 20
+        checkpoint = torch.load('checkpoint_9_2.9143969282132095e-06.pt')
+        input_size = 25
         model = EncodeProcessDecode(input_size).to(device)
         model.load_state_dict(checkpoint['model_state_dict'])
         model.eval()
@@ -23,7 +23,15 @@ class Simulator():
 
     
     def make_graph(self, positions, properties, velocities):
-        x = torch.cat([positions, properties, velocities], 1)
+        d = torch.stack([
+            positions[:,1],       # bottom
+            positions[:,0],       # left
+            positions[:,2],        # back
+            1.2 - positions[:,0], # right
+            0.4 - positions[:,2]   # front
+        ], dim=1)
+        d = torch.clamp(d, min=0, max=self.R)   
+        x = torch.cat([positions, properties, velocities, d], 1)
         data = Data(x=x, pos=positions)
         find_edges = RadiusGraph(self.R)
         data = find_edges(data)
