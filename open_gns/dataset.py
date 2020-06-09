@@ -2,23 +2,23 @@
 import numpy as np
 import h5py
 import torch
-from torch_geometric.data import InMemoryDataset, Data
+from torch_geometric.data import Dataset, Data
 from torch_geometric.transforms import RadiusGraph
 
 R=0.08 # Connectivity radius $R$
 
-class GNSDataset(InMemoryDataset):
+class GNSDataset(Dataset):
     def __init__(self, root, transform=None, pre_transform=None, split='train'):
-        super(GNSDataset, self).__init__(root, transform, pre_transform)
         if split == 'train':
-            idx = 0
+            self.split_idx = 0
         elif split == 'validation':
-            idx = 1
+            self.split_idx = 1
         elif split == 'test':
-            idx = 2
+            self.split_idx = 2
         else:
             raise ValueError(f'Split {split} not found.')
-        self.data, self.slices = torch.load(self.processed_paths[idx])
+        super(GNSDataset, self).__init__(root, transform, pre_transform)
+        self.data_file = h5py.File(self.processed_paths[0], 'r')
         
     @property
     def raw_file_names(self):
@@ -26,7 +26,8 @@ class GNSDataset(InMemoryDataset):
     
     @property
     def processed_file_names(self):
-        return [f'box_bath_{split}.pt' for split in ['train', 'val', 'test']]
+        splits = ('train', 'val', 'test')
+        return [f'box_bath_{splits[self.split_idx]}.hdf5']
     
     def process_rollout(self, positions):
         data_list = []
@@ -63,22 +64,38 @@ class GNSDataset(InMemoryDataset):
             data_list.append(data)
         return data_list
     
+    def save_data_to_hdf5(self, output_file, data_list, start_index=0):
+        for i, data in enumerate(data_list):
+            idx = start_index + i
+            for k in ['x', 'edge_index', 'pos', 'y']:
+                output_file.create_dataset(f'data/{idx}/{k}', data=getattr(data, k), compression='gzip')
+        
+    def len(self):
+        return len(self.data_file.get('data').keys())
+    
+    def get(self, index):
+        d = self.data_file[f'data/{index}']
+        data = Data(
+            x=torch.as_tensor(np.array(d['x'])),
+            edge_index=torch.as_tensor(np.array(d['edge_index'])),
+            pos=torch.as_tensor(np.array(d['pos'])),
+            y=torch.as_tensor(np.array(d['y'])))
+        return data
+    
+
     def process(self):
         # Read all positions & transform into features
         f = h5py.File(self.raw_file_names[0],'r')
-        rollouts = {
-            'train': range(120),
-            'val': range(120,135),
-            'test': range(135,150)
-        }
-        for i, split in enumerate(rollouts):
-            data_list = []
-            for rollout in rollouts[split]:
-                print('Rollout:', rollout)
-                positions = np.array(f.get(f'rollouts/{rollout}/positions'))
-                try:
-                    data_list += self.process_rollout(positions)
-                except Exception as e:
-                    print(f'Bad rollout? {rollout}: {e}')
-            print(f'Saving {len(data_list)} steps to {self.processed_paths[i]}')
-            torch.save(self.collate(data_list), self.processed_paths[i])
+        out = h5py.File(self.processed_paths[0], 'w')
+        rollouts = [range(1000), range(1000,1100), range(1100,1200)]
+        start_index = 0
+        for rollout in rollouts[self.split_idx]:
+            print('Rollout:', rollout)
+            positions = np.array(f.get(f'rollouts/{rollout}/positions'))
+            try:
+                data_list = self.process_rollout(positions)
+                self.save_data_to_hdf5(out, data_list, start_index=start_index)
+                start_index += len(data_list)
+            except Exception as e:
+                print(f'Bad rollout? {rollout}: {e}')
+        out.close()

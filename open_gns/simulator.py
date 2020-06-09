@@ -9,7 +9,7 @@ class Simulator():
         # initialize the model
         self.R = R
         self.device = device or torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        checkpoint = torch.load('checkpoint_9_2.9143969282132095e-06.pt')
+        checkpoint = torch.load('checkpoint_9_7.330730671527333e-07.pt')
         input_size = 25
         model = EncodeProcessDecode(input_size).to(device)
         model.load_state_dict(checkpoint['model_state_dict'])
@@ -42,9 +42,15 @@ class Simulator():
         data = self.data
         if pos is not None:
             data.x[:,:3] = pos
+            data.pos = pos
         accelerations_ = self.model(data.x, data.edge_index)
-        velocities_ = data.x[:,-3:] + accelerations_ 
+        velocities_ = data.x[:,17:20] + accelerations_ 
         positions_ = data.pos + velocities_
+        print('p_t:', data.x[0], data.pos[0])
+        print('a_t:', accelerations_[0])
+        print('v_t:', data.x[0,17:20])
+        print('v_t+1',velocities_[0])
+        print('p_t+1', positions_[0])
         # Reconstruct data for next frame
         self.velocities = torch.cat([self.velocities[:,3:], velocities_], 1)
         self.data = self.make_graph(positions_, self.properties, self.velocities)
