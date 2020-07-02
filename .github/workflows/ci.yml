@@ -3,6 +3,7 @@ on: [push]
 
 jobs:
   test:
+    runs-on: ubuntu-latest
     container: alantrrs/open_gns:latest
     steps:
       - uses: actions/checkout@v2
