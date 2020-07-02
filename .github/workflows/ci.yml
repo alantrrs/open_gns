@@ -3,7 +3,7 @@ on: [push]
 
 jobs:
   test:
-    runs-on: alantrrs/open_gns
+    container: alantrrs/open_gns:latest
     steps:
       - uses: actions/checkout@v2
       - name: Install test dependencies
