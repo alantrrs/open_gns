@@ -2,4 +2,5 @@
 *.pyc
 *.pt
 *.hdf5
+!box_bath_tiny.hdf5
 **/.ipynb_checkpoints/**

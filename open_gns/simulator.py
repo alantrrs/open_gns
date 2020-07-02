@@ -3,13 +3,14 @@ import torch
 from torch_geometric.data import Data
 from torch_geometric.transforms import RadiusGraph
 from open_gns.models import EncodeProcessDecode
+from open_gns.normalizer import Normalizer
 
 class Simulator():
     def __init__(self, *, positions, properties, velocities=None, device=None, R=0.08):
         # initialize the model
         self.R = R
         self.device = device or torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        checkpoint = torch.load('checkpoint_9_7.330730671527333e-07.pt')
+        checkpoint = torch.load('checkpoint_9_2.7949773842113843e-06.pt')
         input_size = 25
         model = EncodeProcessDecode(input_size).to(device)
         model.load_state_dict(checkpoint['model_state_dict'])
@@ -20,6 +21,7 @@ class Simulator():
         self.velocities = velocities if velocities is not None else torch.zeros((len(positions), 5*3))
         self.velocities = self.velocities.to(device)
         self.data = self.make_graph(positions, properties, self.velocities)
+        self.norm = Normalizer(input_size, mask_cols=[3,4], device=device)
 
     
     def make_graph(self, positions, properties, velocities):
@@ -43,7 +45,7 @@ class Simulator():
         if pos is not None:
             data.x[:,:3] = pos
             data.pos = pos
-        accelerations_ = self.model(data.x, data.edge_index)
+        accelerations_ = self.model(self.norm(data.x), data.edge_index)
         velocities_ = data.x[:,17:20] + accelerations_ 
         positions_ = data.pos + velocities_
         print('p_t:', data.x[0], data.pos[0])

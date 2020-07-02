@@ -34,13 +34,48 @@ class NodeModel(torch.nn.Module):
     def forward(self, x, edge_index, edge_attr, u, batch):
         # TODO: Do we need to combine with edge_attr?
         return self.node_mlp(x)
-                
+
+
 class Encoder(torch.nn.Module):
     def __init__(self, input_size, output_size=128):
         super(Encoder, self).__init__()
         self.encoder = MetaLayer(EdgeModel(2*input_size), NodeModel(input_size))
-    
+
     def forward(self, x, edge_index):
         # TODO: The encoder needs to build the Graph
         # otherwise the graph would need to be pre-built
         return self.encoder(x, edge_index)
+
+    
+class RelativeEdgeModel(torch.nn.Module):
+    def __init__(self, hidden_size=128):
+        super(RelativeEdgeModel, self).__init__()
+        self.edge_mlp = make_mlp(4, hidden_size)
+
+    def forward(self, src, dest, edge_attr, u, batch):
+        distance = src[:,0:3] - dest[:,0:3]
+        magnitude = torch.norm(distance, dim=1, keepdim=True)
+        out = torch.cat([distance, magnitude], 1)
+        return self.edge_mlp(out)
+
+
+class RelativeNodeModel(torch.nn.Module):
+    def __init__(self, input_size, hidden_size=128):
+        super(RelativeNodeModel, self).__init__()
+        self.node_mlp = make_mlp(input_size, hidden_size)
+
+    def forward(self, x, edge_index, edge_attr, u, batch):
+        masked = x.clone()
+        masked[:,0:3] = 0
+        return self.node_mlp(x)
+
+    
+class RelativeEncoder(torch.nn.Module):
+    def __init__(self, input_size, output_size=128):
+        super(RelativeEncoder, self).__init__()
+        self.encoder = MetaLayer(RelativeEdgeModel(), RelativeNodeModel(input_size))
+
+    def forward(self, x, edge_index):
+        return self.encoder(x, edge_index)
+    
+    

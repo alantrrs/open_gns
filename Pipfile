@@ -1,0 +1,25 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[[source]]
+name = "pygeo"
+url = "https://pytorch-geometric.com/whl/torch-1.4.0.html"
+verify_ssl = true
+
+[dev-packages]
+flake8 = "*"
+
+[packages]
+torch = "*"
+pytest = "*"
+h5py = "*"
+torch-scatter = {version="latest+cu101", index="pygeo"}
+torch-cluster = {version="latest+cu101", index="pygeo"}
+torch-sparse = {version="latest+cu101", index="pygeo"}
+torch-spline-conv = {version="latest+cu101", index="pygeo"}
+torch-geometric = {version="latest+cu101", index="pygeo"}
+
+[requires]
+python_version = "3.6"
