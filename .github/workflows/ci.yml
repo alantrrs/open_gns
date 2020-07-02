@@ -1,0 +1,12 @@
+name: Test
+on: [push]
+
+jobs:
+  test:
+    runs-on: alantrrs/open_gns
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install test dependencies
+        run: pip install pytest
+      - name: Test
+        run: python -m pytest
