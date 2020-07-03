@@ -151,13 +151,14 @@ RUN pip install torch-scatter==latest+${CUDA} \
 # Install Jupyter lab
 RUN pip install jupyterlab
 
-# Install 
+# Install ipyvolume
 RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh | bash \
     && export NVM_DIR="$HOME/.nvm" && [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" \
     && nvm install 12.16 \
     && pip install ipyvolume && jupyter labextension install @jupyter-widgets/jupyterlab-manager \
-    && yter labextension install ipyvolume \
+    && jupyter labextension install ipyvolume \
     && jupyter labextension install jupyter-threejs
+
 
 
 # Set the default command to python3.
