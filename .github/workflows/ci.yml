@@ -4,10 +4,13 @@ on: [push]
 jobs:
   test:
     runs-on: ubuntu-latest
-    container: alantrrs/open_gns:latest
     steps:
       - uses: actions/checkout@v2
+      - name: Set up Python 3.x
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
       - name: Install test dependencies
-        run: pip install pytest
+        run: pip install -r requirements.txt -f https://download.pytorch.org/whl/torch_stable.html -f https://pytorch-geometric.com/whl/torch-1.5.0.html
       - name: Test
         run: python -m pytest
