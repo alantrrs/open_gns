@@ -4,6 +4,7 @@ import torch
 from open_gns.models.encoder import RelativeEncoder
 from open_gns.models.processor import Processor
 from open_gns.models.decoder import Decoder
+from open_gns.models import EncodeProcessDecode
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -37,3 +38,11 @@ def test_decoder_output(tiny_dataset):
     decoder = Decoder(128)
     y = decoder(x)
     assert y.size(1) == 3
+
+
+def test_encoder_processor_decoder(tiny_dataset):
+    data = tiny_dataset[0]
+    data = data.to(device)
+    model = EncodeProcessDecode(25)
+    y = model(data.x, data.edge_index)
+    assert y.size() == (len(data.x), 3)
