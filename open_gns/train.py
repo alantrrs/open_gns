@@ -6,7 +6,6 @@ from torch.nn import MSELoss
 from open_gns.models import EncodeProcessDecode
 from open_gns.dataset import GNSDataset
 from torch_geometric.data import DataLoader
-from livelossplot import PlotLosses
 from tqdm import tqdm
 
 
@@ -20,7 +19,6 @@ def train(model, train_dataset, val_dataset=None, device=None, num_epochs=10):
     optimizer = Adam(model.parameters(), lr=0.001)
     lr_scheduler = ExponentialLR(optimizer, 0.4)
     mse = MSELoss()
-    liveloss = PlotLosses()
 
     for epoch in range(num_epochs):
         logs = {}
@@ -52,8 +50,6 @@ def train(model, train_dataset, val_dataset=None, device=None, num_epochs=10):
                     'loss': loss,
                 }, f'checkpoint_{epoch}_{epoch_loss}.pt')
         lr_scheduler.step()
-        liveloss.update(logs)
-        liveloss.send()
 
 
 if __name__ == '__main__':
