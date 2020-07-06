@@ -1,4 +1,7 @@
-*.pyc
-*.pt
-*.hdf5
+**/*.pyc
+**/*.pt
+**/*.hdf5
+.checkpoints/
+.pytest_cache/
+.git/
 **/.ipynb_checkpoints/**
