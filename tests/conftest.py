@@ -1,6 +1,12 @@
 
 import pytest
 from open_gns.dataset import GNSDataset
+import torch
+
+
+@pytest.fixture
+def device():
+    return torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 
 @pytest.fixture
