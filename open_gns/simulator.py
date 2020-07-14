@@ -33,13 +33,13 @@ class Simulator():
             1.2 - positions[:,0], # right
             0.4 - positions[:,2]   # front
         ], dim=1)
-        d = torch.clamp(d, min=0, max=self.R)   
+        d = torch.clamp(d, min=0, max=self.R) 
         x = torch.cat([positions, properties, velocities, d], 1)
         data = Data(x=x, pos=positions)
         find_edges = RadiusGraph(self.R)
         data = find_edges(data)
         return data
-    
+
     def step(self, pos=None):
         # Predict accelerations
         data = self.data
@@ -49,11 +49,6 @@ class Simulator():
         accelerations_ = self.model(self.norm(data.x), data.edge_index)
         velocities_ = data.x[:,17:20] + accelerations_ 
         positions_ = data.pos + velocities_
-        print('p_t:', data.x[0], data.pos[0])
-        print('a_t:', accelerations_[0])
-        print('v_t:', data.x[0,17:20])
-        print('v_t+1',velocities_[0])
-        print('p_t+1', positions_[0])
         # Reconstruct data for next frame
         self.velocities = torch.cat([self.velocities[:,3:], velocities_], 1)
         self.data = self.make_graph(positions_, self.properties, self.velocities)

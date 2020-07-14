@@ -7,9 +7,10 @@ from open_gns.models import EncodeProcessDecode
 from open_gns.dataset import GNSDataset
 from torch_geometric.data import DataLoader
 from tqdm import tqdm
+from os import path
 
 
-def train(model, train_dataset, val_dataset=None, device=None, num_epochs=10):
+def train(model, train_dataset, val_dataset=None, device=None, num_epochs=10, checkpoints_dir=None):
     device = device if device is not None else torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model = model.to(device)
     dataloaders = {'train': DataLoader(train_dataset, batch_size=2, shuffle=True)}
@@ -42,13 +43,13 @@ def train(model, train_dataset, val_dataset=None, device=None, num_epochs=10):
             label = 'log loss' if phase == 'train' else 'val_log loss'
             logs[label] = epoch_loss
             # Save checkpoint
-            if phase == 'train':
+            if phase == 'train' and checkpoints_dir:
                 torch.save({
                     'epoch': epoch,
                     'model_state_dict': model.state_dict(),
                     'optimizer_state_dict': optimizer.state_dict(),
                     'loss': loss,
-                }, f'checkpoint_{epoch}_{epoch_loss}.pt')
+                }, path.join(checkpoints_dir, f'checkpoint_{epoch}_{epoch_loss}.pt'))
         lr_scheduler.step()
 
 

@@ -13,4 +13,4 @@ jobs:
       - name: Install test dependencies
         run: pip install -r requirements.txt -f https://download.pytorch.org/whl/torch_stable.html -f https://pytorch-geometric.com/whl/torch-1.5.0.html
       - name: Test
-        run: python -m pytest
+        run: python -m pytest -m "not longrun"
