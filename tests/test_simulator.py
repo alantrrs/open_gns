@@ -12,7 +12,7 @@ def test_simulator_rollout(tiny_dataset, device):
     data = rollout[0]
     data = data.to(device)
     v = data.x[:, 5:20]
-    sim = Simulator(positions=data.pos, velocities=v, properties=data.x[:, 3:5], device=device)
+    sim = Simulator(model_file='.checkpoints/test_checkpoint.pt', positions=data.pos, velocities=v, properties=data.x[:, 3:5], device=device)
     assert torch.all(sim.data.edge_index == data.edge_index)
     assert torch.all(sim.data.pos == data.pos)
     positions = []
@@ -33,3 +33,4 @@ def test_simulator_rollout(tiny_dataset, device):
         velocities.append(vel.detach().cpu())
         # Compare against dataset
         loss = mse(acc, data.y)
+    assert len(positions) == len(pos_gt)

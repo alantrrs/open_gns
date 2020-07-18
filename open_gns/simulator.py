@@ -6,11 +6,10 @@ from open_gns.models import EncodeProcessDecode
 from open_gns.normalizer import Normalizer
 
 class Simulator():
-    def __init__(self, *, model_file=None, positions, properties, velocities=None, device=None, R=0.08):
+    def __init__(self, *, model_file, positions, properties, velocities=None, device=None, R=0.08):
         # initialize the model
         self.R = R
         self.device = device or torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        model_file = model_file if model_file is not None else '.checkpoints/checkpoint_9_2.7949691473259488e-06.pt'
         checkpoint = torch.load(model_file)
         input_size = 25
         model = EncodeProcessDecode(input_size).to(device)
