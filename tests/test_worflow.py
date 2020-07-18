@@ -14,19 +14,19 @@ def test_train_and_evaluate(device):
     model = EncodeProcessDecode(train_dataset.num_node_features)
     train(model, train_dataset, val_dataset, num_epochs=2)
     # Save
-    torch.save({'model_state_dict': model.state_dict}, 'model.pt')
+    torch.save({'model_state_dict': model.state_dict()}, 'model.pt')
     # Simulate
     data = val_dataset[0]
     data = data.to(device)
     v = data.x[:, 5:20]
-    sim = Simulator(mode_file='model.pt', positions=data.pos, velocities=v, properties=data.x[:, 3:5], device=device)
+    sim = Simulator(model_file='model.pt', positions=data.pos, velocities=v, properties=data.x[:, 3:5], device=device)
     positions = []
     accelerations = []
     velocities = []
     acc_gt = []
     pos_gt = []
     vel_gt = []
-    for i, data in enumerate(dataset[1:]):
+    for i, data in enumerate(val_dataset[1:]):
         pos_gt.append(data.pos)
         acc_gt.append(data.y)
         vel_gt.append(data.x[:, 17:20])
