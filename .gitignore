@@ -1,5 +1,8 @@
+**.tfevents.**
 .vim/**
 *.pyc
 *.pt
 *.hdf5
+!.checkpoints/test_checkpoint.pt
+!box_bath_tiny.hdf5
 **/.ipynb_checkpoints/**

@@ -1,12 +1,12 @@
 import torch
-from open_gns.models.encoder import Encoder
+from open_gns.models.encoder import RelativeEncoder
 from open_gns.models.processor import Processor
 from open_gns.models.decoder import Decoder
 
 class EncodeProcessDecode(torch.nn.Module):
     def __init__(self, input_size, hidden_size=128):
         super(EncodeProcessDecode, self).__init__()
-        self.encoder = Encoder(input_size)
+        self.encoder = RelativeEncoder(input_size)
         self.processor = Processor(hidden_size)
         self.decoder = Decoder(hidden_size)
 
