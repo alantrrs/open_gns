@@ -12,16 +12,16 @@ class Simulator():
         self.device = device or torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         checkpoint = torch.load(model_file)
         input_size = 25
-        model = EncodeProcessDecode(input_size).to(device)
+        model = EncodeProcessDecode(input_size).to(self.device)
         model.load_state_dict(checkpoint['model_state_dict'])
         model.eval()
         self.model = model
-        self.positions = positions.to(device)
-        self.properties = properties.to(device)
+        self.positions = positions.to(self.device)
+        self.properties = properties.to(self.device)
         self.velocities = velocities if velocities is not None else torch.zeros((len(positions), 5*3))
-        self.velocities = self.velocities.to(device)
+        self.velocities = self.velocities.to(self.device)
         self.data = self.make_graph(positions, properties, self.velocities)
-        self.norm = Normalizer(input_size, mask_cols=[3,4], device=device)
+        self.norm = Normalizer(input_size, mask_cols=[3,4], device=self.device)
 
     
     def make_graph(self, positions, properties, velocities):
