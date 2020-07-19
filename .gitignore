@@ -1,3 +1,4 @@
+**.tfevents.**
 .vim/**
 *.pyc
 *.pt

@@ -8,7 +8,8 @@ from open_gns.dataset import GNSDataset
 from torch_geometric.data import DataLoader
 from tqdm import tqdm
 from os import path
-
+from torch.utils.tensorboard import SummaryWriter
+from uuid import uuid4
 
 def train(model, train_dataset, val_dataset=None, device=None, num_epochs=10, checkpoints_dir=None):
     device = device if device is not None else torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -20,9 +21,8 @@ def train(model, train_dataset, val_dataset=None, device=None, num_epochs=10, ch
     optimizer = Adam(model.parameters(), lr=0.001)
     lr_scheduler = ExponentialLR(optimizer, 0.4)
     mse = MSELoss()
-
+    writer = SummaryWriter(log_dir=f'logs/{uuid4()}')
     for epoch in range(num_epochs):
-        logs = {}
         for phase in dataloaders:
             if phase == 'train':
                 model.train()
@@ -37,11 +37,10 @@ def train(model, train_dataset, val_dataset=None, device=None, num_epochs=10, ch
                     optimizer.zero_grad()
                     loss.backward()
                     optimizer.step()
-                running_loss += loss.item()*data.num_graphs
-            # Log epoch loss
-            epoch_loss = running_loss/len(dataloaders[phase].dataset)
-            label = 'log loss' if phase == 'train' else 'val_log loss'
-            logs[label] = epoch_loss
+                running_loss += loss.item()
+            # Log loss
+            epoch_loss = running_loss / len(dataloaders[phase].dataset)
+            writer.add_scalar(f'Loss/{phase}', epoch_loss, epoch)
             # Save checkpoint
             if phase == 'train' and checkpoints_dir:
                 torch.save({
