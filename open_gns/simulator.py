@@ -10,7 +10,7 @@ class Simulator():
         # initialize the model
         self.R = R
         self.device = device or torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        checkpoint = torch.load(model_file)
+        checkpoint = torch.load(model_file, map_location=device)
         input_size = 25
         model = EncodeProcessDecode(input_size).to(self.device)
         model.load_state_dict(checkpoint['model_state_dict'])
